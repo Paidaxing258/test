@@ -1,6 +1,6 @@
 from framework import Attacker, Scorer, Summarizer, Retrieval, Target
 from framework_r import Attacker_r, Scorer_r, Summarizer_r
-from llm import HuggingFaceModel, VLLMModel, OpenAIEmbeddingModel, DeepSeekModel
+from llm import HuggingFaceModel, VLLMModel, OpenAIEmbeddingModel, DeepSeekModel, ModelScopeModel
 import argparse
 import logging
 import os
@@ -121,18 +121,19 @@ if __name__ == '__main__':
     warm_up_iterations = args.warm_up_iterations
     lifelong_iterations = args.lifelong_iterations
 
-    hf_token = args.hf_token
     if args.model == "llama3":
-        repo_name = "meta-llama/Meta-Llama-3-8B-Instruct"
+        # ModelScope的Llama3模型ID（需确认是否存在）
+        model_id = "LLM-Research/Meta-Llama-3-8B-Instruct"
         config_name = "llama-3-instruct"
-    else:
-        repo_name = "google/gemma-1.1-7b-it"
-        config_name = "gemma-it"
-    if args.vllm:
-        model = VLLMModel(repo_name, config_dir, config_name, hf_token)
-    else:
-        model = HuggingFaceModel(repo_name, config_dir, config_name, hf_token)
-    # configure your own base model here
+    elif args.model == "qwen":
+        # 示例：阿里通义千问（ModelScope原生支持）
+        model_id = "Qwen/Qwen1.5-1.8B-Chat"
+        config_name = "qwen-instruct"  # 需确保有对应的配置文件
+    # else:
+    #     # 示例：智谱ChatGLM
+    #     model_id = "ZhipuAI/chatglm3-6b"
+    #     config_name = "chatglm3"  # 需确保有对应的配置文件
+    model = ModelScopeModel(model_id, config_dir, config_name)  # 无需hf_token，替换为ModelScopeModel
 
     deepseek_model = DeepSeekModel(args.deepseek_api_key, args.deepseek_model)
     attacker = Attacker_r(deepseek_model)
